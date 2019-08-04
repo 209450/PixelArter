@@ -10,7 +10,7 @@ class App(QApplication):
         main_window = MainWindow()
         main_window.show()
         self.main_window = main_window
-
 if __name__ == "__main__":
+
     app = App(sys.argv)
     sys.exit(app.exec_())
