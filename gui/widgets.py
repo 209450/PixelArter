@@ -27,7 +27,7 @@ class PixelsContainerWidget(QWidget):
         self.setPalette(p)
 
     def makePixelGrid(self, x, y, h, w):
-        self.pixels = np.array([[self.Pixel(QColor(0, 255, 0), QPoint(j, i))
+        self.pixels = np.array([[self.Pixel(QColor(255, 0, 0), QPoint(j, i))
                                  for i in range(w)] for j in range(h)])
         print(self.pixels.shape)
         self.setMinimumHeight(self.zoom_ratio * h)
@@ -42,8 +42,15 @@ class PixelsContainerWidget(QWidget):
         y = event.pos().y()
         print('{},{}'.format(x, y))
 
+        r = self.pixels[int(x / self.zoom_ratio), int(y / self.zoom_ratio)]
+        r.color = QColor(0, 0, 255)
+
+        print("{},{}".format(r.point.x(), r.point.y()))
+        self.repaint()
+
     def wheelEvent(self, QWheelEvent):
         wheel_change_angle = QWheelEvent.angleDelta() / 8
+        print(QWheelEvent.pos())
         if wheel_change_angle.y() > 0:
             self.zoom_ratio -= 2
         else:
@@ -63,6 +70,7 @@ class PixelsContainerWidget(QWidget):
                 x = j.point.x()
                 y = j.point.y()
                 empty_rect = QRect(zoom_ratio * x, zoom_ratio * y, zoom_ratio, zoom_ratio)
+                qp.fillRect(empty_rect, j.color)
                 qp.drawRect(empty_rect)
 
     class Pixel:
