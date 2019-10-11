@@ -1,5 +1,7 @@
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import QMainWindow, QWidget
 from gui.widgets import PixelsContainerWidget, WidgetFromFile
+
 
 class MainWindow(QMainWindow, WidgetFromFile):
     ui_path = 'gui/uis/MainWindow.ui'
@@ -8,4 +10,4 @@ class MainWindow(QMainWindow, WidgetFromFile):
         super().__init__()
         self.laod_ui(self.ui_path)
         # print(self.mdiArea)
-        self.mdiArea.addSubWindow(PixelsContainerWidget(10,5))
+        self.mdiArea.addSubWindow(PixelsContainerWidget(0, 0, 8, 16))
