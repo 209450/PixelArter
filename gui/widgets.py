@@ -1,7 +1,7 @@
 import PyQt5
 
 from PyQt5.QtWidgets import QWidget, QGridLayout, QPushButton
-from PyQt5.QtGui import QPainter, QColor, QPen, QBrush, QTransform
+from PyQt5.QtGui import QPainter, QColor, QPen, QBrush, QTransform, QImage
 from PyQt5 import QtCore, uic
 from PyQt5.QtCore import QPoint, QRect, QLine
 import numpy as np
@@ -20,22 +20,16 @@ class PixelsContainerWidget(QWidget):
         self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
         self.makePixelGrid(x, y, h, w)
         self.qp = QPainter(self)
-
         self.setAutoFillBackground(True)
         p = self.palette()
         p.setColor(self.backgroundRole(), QtCore.Qt.blue)
         self.setPalette(p)
 
     def makePixelGrid(self, x, y, h, w):
-        self.pixels = np.array([[self.Pixel(QColor(255, 0, 0), QPoint(j, i))
-                                 for i in range(w)] for j in range(h)])
-        print(self.pixels.shape)
-        self.setMinimumHeight(self.zoom_ratio * h)
-        self.setMinimumWidth(self.zoom_ratio * w)
-        print("  gdsagsd {}".format(self.pixels[0, 0].point.x()))
-
-        f = np.vectorize(lambda x: x.point.x())
-        print(f(self.pixels))
+        self.pixels = np.array([[Pixel(QColor(255, 0, 0), QPoint(j, i))
+                                 for i in range(h)] for j in range(w)])
+        self.setMinimumHeight(h * self.zoom_ratio)
+        self.setMinimumWidth(w * self.zoom_ratio)
 
     def mousePressEvent(self, event):
         x = event.pos().x()
@@ -73,10 +67,16 @@ class PixelsContainerWidget(QWidget):
                 qp.fillRect(empty_rect, j.color)
                 qp.drawRect(empty_rect)
 
-    class Pixel:
-        def __init__(self, color, point):
-            self.color = color
-            self.point = point
+    def convertPixelsToQImage(self):
+        pixels = self.pixels
+        image = QImage(pixels.shape[0], pixels.shape[1], QImage.Format_RGB32)
+        for row in pixels:
+            for col in row:
+                image.setPixelColor(col.point, col.color)
+        return image
 
-        def __str__(self):
-            return "{}, {}, {}".format(self.color, self.point.x, self.point.y)
+class Pixel:
+    def __init__(self, color, point):
+        self.color = color
+        self.point = point
+
