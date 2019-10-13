@@ -1,35 +1,38 @@
 import PyQt5
 
-from PyQt5.QtWidgets import QWidget, QGridLayout, QPushButton
-from PyQt5.QtGui import QPainter, QColor, QPen, QBrush, QTransform, QImage
+from PyQt5.QtWidgets import QWidget, QGridLayout, QPushButton, QDialog, QErrorMessage, QMessageBox
+from PyQt5.QtGui import QPainter, QColor, QPen, QBrush, QTransform, QImage, QIntValidator
 from PyQt5 import QtCore, uic
 from PyQt5.QtCore import QPoint, QRect, QLine
 import numpy as np
 
 
-class WidgetFromFile():
-    def laod_ui(self, ui_path):
+class WidgetFromFile:
+    def loadUI(self, ui_path):
         uic.loadUi(ui_path, self)
 
 
 class PixelsContainerWidget(QWidget):
     zoom_ratio = 50
+    background_color = QtCore.Qt.darkGray
+    alpha_color = QtCore.Qt.transparent
 
     def __init__(self, x, y, h, w):
         super().__init__()
         self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
-        self.makePixelGrid(x, y, h, w)
+        self.makeEmptyPixelGrid(h, w)
         self.qp = QPainter(self)
         self.setAutoFillBackground(True)
         p = self.palette()
-        p.setColor(self.backgroundRole(), QtCore.Qt.blue)
+        p.setColor(self.backgroundRole(), self.background_color)
         self.setPalette(p)
 
-    def makePixelGrid(self, x, y, h, w):
-        self.pixels = np.array([[Pixel(QColor(255, 0, 0), QPoint(j, i))
+    def makeEmptyPixelGrid(self, h, w):
+        self.pixels = np.array([[Pixel(self.alpha_color, QPoint(j, i))
                                  for i in range(h)] for j in range(w)])
         self.setMinimumHeight(h * self.zoom_ratio)
         self.setMinimumWidth(w * self.zoom_ratio)
+        self.repaint()
 
     def mousePressEvent(self, event):
         x = event.pos().x()
@@ -75,8 +78,67 @@ class PixelsContainerWidget(QWidget):
                 image.setPixelColor(col.point, col.color)
         return image
 
+    def makePixelGridFromQImage(self, image):
+        height = image.height()
+        width = image.width()
+        pixels = np.empty([height, width], dtype=Pixel)
+        for row in range(height):
+            for col in range(width):
+                pixels[row, col] = Pixel(image.pixelColor(col, row), QPoint(col, row))
+        self.pixels = pixels
+        self.repaint()
+
+    def convertQImageToPixels(self, image):
+        if not image.isNull():
+            self.makePixelGridFromQImage(image)
+
+
 class Pixel:
     def __init__(self, color, point):
         self.color = color
         self.point = point
+
+
+class NewFileDialog(QDialog, WidgetFromFile):
+    new_file_dialog = 'gui/uis/NewFileDialog.ui'
+    error_message = 'Values are not valid!'
+    window_title = 'New File'
+    height_range = [1, 1000]
+    width_range = [1, 1000]
+
+    def __init__(self):
+        super().__init__()
+        self.user_chosen_height = -1
+        self.user_chosen_width = -1
+        self.loadUI(self.new_file_dialog)
+        self.setWindowTitle(self.window_title)
+
+        self.initLineEditValidation()
+        self.initEvents()
+
+    def initLineEditValidation(self):
+        self.heightLineEdit.setValidator(QIntValidator(self.height_range[0], self.height_range[1], self))
+        self.widthLineEdit.setValidator(QIntValidator(self.width_range[0], self.width_range[1], self))
+        self.heightLabel.setText("{} {}".format(self.heightLabel.text(), self.height_range))
+        self.widthLabel.setText("{} {}".format(self.widthLabel.text(), self.width_range))
+
+    def initEvents(self):
+        self.createButton.clicked.connect(self.createButtonHandler)
+        self.cancelButton.clicked.connect(self.cancelButtonHandler)
+
+    def createButtonHandler(self):
+        if self.heightLineEdit.hasAcceptableInput() and self.widthLineEdit.hasAcceptableInput():
+            self.user_chosen_height = int(self.heightLineEdit.text())
+            self.user_chosen_width = int(self.widthLineEdit.text())
+            print("in", self.user_chosen_height, self.user_chosen_width)
+            self.accept()
+        else:
+            box = QMessageBox(self)
+            box.setWindowTitle(self.window_title)
+            box.setIcon(QMessageBox.Critical)
+            box.setText(self.error_message)
+            box.exec()
+
+    def cancelButtonHandler(self):
+        self.reject()
 
