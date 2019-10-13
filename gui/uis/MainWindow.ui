@@ -129,6 +129,8 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionNewFile"/>
+    <addaction name="actionOpenFile"/>
     <addaction name="separator"/>
     <addaction name="actionSave"/>
     <addaction name="actionSaveAs"/>
@@ -150,6 +152,16 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionNewFile">
+   <property name="text">
+    <string>New file</string>
+   </property>
+  </action>
+  <action name="actionOpenFile">
+   <property name="text">
+    <string>Open file...</string>
    </property>
   </action>
  </widget>
