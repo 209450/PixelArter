@@ -23,8 +23,18 @@
    <layout class="QGridLayout" name="gridLayout_3">
     <item row="0" column="0">
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0" colspan="2">
-       <widget class="QGroupBox" name="groupBox_2">
+      <item row="2" column="0" colspan="3">
+       <widget class="QGroupBox" name="groupBox_5">
+        <property name="title">
+         <string>GroupBox</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QGroupBox" name="groupBox_3">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="title">
          <string>GroupBox</string>
         </property>
@@ -36,8 +46,8 @@
          <string>GroupBox</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
-         <item row="2" column="1">
-          <widget class="QRadioButton" name="radioButton_6">
+         <item row="0" column="1">
+          <widget class="QRadioButton" name="radioButton_4">
            <property name="text">
             <string>RadioButton</string>
            </property>
@@ -50,8 +60,8 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="QRadioButton" name="radioButton_4">
+         <item row="0" column="0">
+          <widget class="QRadioButton" name="radioButton_3">
            <property name="text">
             <string>RadioButton</string>
            </property>
@@ -64,8 +74,8 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="0">
-          <widget class="QRadioButton" name="radioButton_3">
+         <item row="2" column="1">
+          <widget class="QRadioButton" name="radioButton_6">
            <property name="text">
             <string>RadioButton</string>
            </property>
@@ -81,23 +91,6 @@
         </layout>
        </widget>
       </item>
-      <item row="1" column="2">
-       <widget class="QGroupBox" name="groupBox_3">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="title">
-         <string>GroupBox</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="3">
-       <widget class="QGroupBox" name="groupBox_5">
-        <property name="title">
-         <string>GroupBox</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="2">
        <widget class="QGroupBox" name="groupBox_4">
         <property name="title">
@@ -105,12 +98,15 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QMdiArea" name="mdiArea">
-        <property name="frameShape">
-         <enum>QFrame::Box</enum>
+      <item row="0" column="0" colspan="2">
+       <widget class="QGroupBox" name="groupBox_2">
+        <property name="title">
+         <string>GroupBox</string>
         </property>
        </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QGraphicsView" name="pixelGridView"/>
       </item>
      </layout>
     </item>

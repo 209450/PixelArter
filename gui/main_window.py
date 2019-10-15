@@ -3,6 +3,7 @@ from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtWidgets import QMainWindow, QWidget, QDialog, QLabel, QHBoxLayout
 from gui.widgets import PixelsContainerWidget, WidgetFromFile, NewFileDialog
 from gui.io_manager import IOManager
+from gui.qgraphics_components import PixelGridScene
 import os
 
 
@@ -12,8 +13,9 @@ class MainWindow(QMainWindow, WidgetFromFile):
     def __init__(self):
         super().__init__()
         self.loadUI(self.ui_path)
-        self.pixelContainer = PixelsContainerWidget(0, 0, 8, 16)
-        self.mdiArea.addSubWindow(self.pixelContainer)
+        # self.pixelContainer = PixelsContainerWidget(0, 0, 8, 16)
+        # self.mdiArea.addSubWindow(self.pixelContainer)
+        self.pixelGridView.setScene(PixelGridScene(self.pixelGridView, 4, 8))
         self.initEvents()
         self.io = IOManager()
 
@@ -33,7 +35,7 @@ class MainWindow(QMainWindow, WidgetFromFile):
         dialog = NewFileDialog()
         result = dialog.exec()
         if result:
-            self.pixelContainer.makeEmptyPixelGrid(dialog.user_chosen_height,dialog.user_chosen_width)
+            self.pixelContainer.makeEmptyPixelGrid(dialog.user_chosen_height, dialog.user_chosen_width)
 
     def actionOpenFileHandler(self):
         self.pixelContainer.convertQImageToPixels(self.io.openQImageFromFile(self))
