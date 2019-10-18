@@ -47,9 +47,28 @@
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
          <item row="0" column="1">
-          <widget class="QRadioButton" name="radioButton_4">
+          <widget class="QRadioButton" name="lineRadioButton">
+           <property name="layoutDirection">
+            <enum>Qt::LeftToRight</enum>
+           </property>
+           <property name="autoFillBackground">
+            <bool>false</bool>
+           </property>
            <property name="text">
-            <string>RadioButton</string>
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>../icons/line.png</normaloff>../icons/line.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>64</width>
+             <height>64</height>
+            </size>
+           </property>
+           <property name="shortcut">
+            <string/>
            </property>
           </widget>
          </item>
@@ -61,9 +80,22 @@
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QRadioButton" name="radioButton_3">
+          <widget class="QRadioButton" name="penRadioButton">
            <property name="text">
-            <string>RadioButton</string>
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>../icons/pen.png</normaloff>../icons/pen.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>64</width>
+             <height>64</height>
+            </size>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
            </property>
           </widget>
          </item>

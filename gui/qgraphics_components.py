@@ -16,6 +16,7 @@ class PixelGridScene(QGraphicsScene):
         self.setBackgroundBrush(self.background_color)
         self.pixels = numpy.empty((height, width), dtype=Pixel)
         self._makePixelGrid(height, width)
+        self.current_drawing_mode = DrawingModeStrategy()
 
     @classmethod
     def pixelGridFromQImage(cls, graphic_view, image):
@@ -31,11 +32,25 @@ class PixelGridScene(QGraphicsScene):
                 self.pixels[i, j] = pixel
                 self.addItem(pixel)
 
+    def changeDrawingMode(self, mode):
+        self.current_drawing_mode = mode
+
     def mousePressEvent(self, event):
         x = event.scenePos().x()
         y = event.scenePos().y()
-        pixel = self.itemAt(x, y, self.graphic_view.transform())
-        pixel.change_fulfillment(QColor(0, 0, 255, 255))
+        self.current_drawing_mode.mousePress(self, self.pixels, x, y)
+        self.update()
+
+    def mouseReleaseEvent(self, event):
+        x = event.scenePos().x()
+        y = event.scenePos().y()
+        self.current_drawing_mode.mouseRelease(self, self.pixels, x, y)
+        self.update()
+
+    def mouseMoveEvent(self, event):
+        x = event.scenePos().x()
+        y = event.scenePos().y()
+        self.current_drawing_mode.mouseMove(self, self.pixels, x, y)
         self.update()
 
     def wheelEvent(self, event):
@@ -90,3 +105,28 @@ class Pixel(QGraphicsRectItem):
     def paint(self, painter, QStyleOptionGraphicsItem, widget=None):
         painter.setBrush(self.brush)
         painter.drawRect(self.rect())
+
+
+class DrawingModeStrategy:
+    def mouseMove(self, scene, pixels, x, y):
+        pass
+
+    def mousePress(self, scene, pixels, x, y):
+        pass
+
+    def mouseRelease(self, scene, pixels, x, y):
+        pass
+
+
+class PenMode(DrawingModeStrategy):
+
+    def mouseMove(self, scene, pixels, x, y):
+        self.mousePress(scene, pixels, x, y)
+
+    def mousePress(self, scene, pixels, x, y):
+        pixel = scene.itemAt(x, y, scene.graphic_view.transform())
+        if pixel is not None:
+            pixel.change_fulfillment(QColor(0, 0, 255, 255))
+
+    def mouseRelease(self, scene, pixels, x, y):
+        pass
