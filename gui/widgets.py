@@ -27,6 +27,7 @@ class PixelsContainerWidget(QWidget):
         p.setColor(self.backgroundRole(), self.background_color)
         self.setPalette(p)
 
+
     def makeEmptyPixelGrid(self, h, w):
         self.pixels = np.array([[Pixel(self.alpha_color, QPoint(j, i))
                                  for i in range(h)] for j in range(w)])
@@ -37,12 +38,14 @@ class PixelsContainerWidget(QWidget):
     def mousePressEvent(self, event):
         x = event.pos().x()
         y = event.pos().y()
-        print('{},{}'.format(x, y))
+        print(x, y)
+        print()
 
-        r = self.pixels[int(x / self.zoom_ratio), int(y / self.zoom_ratio)]
-        r.color = QColor(0, 0, 255)
+        # r = self.pixels[int(x / self.zoom_ratio), int(y / self.zoom_ratio)]
+        # r.color = QColor(0, 0, 255)
+        #
+        # print("{},{}".format(r.point.x(), r.point.y()))
 
-        print("{},{}".format(r.point.x(), r.point.y()))
         self.repaint()
 
     def wheelEvent(self, QWheelEvent):
@@ -56,9 +59,14 @@ class PixelsContainerWidget(QWidget):
 
     def paintEvent(self, event):
         self.qp.begin(self)
+        self.qp.scale(self.zoom_ratio,self.zoom_ratio)
+
         self.qp.setPen(QPen(QtCore.Qt.green))
-        self.drawPixelGrid(self.qp)
+        self.qp.drawRect(0,0,5,5)
+
+        # self.drawPixelGrid(self.qp)
         self.qp.end()
+
 
     def drawPixelGrid(self, qp):
         zoom_ratio = self.zoom_ratio
