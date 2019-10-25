@@ -1,9 +1,11 @@
 from PyQt5 import QtCore
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtWidgets import QMainWindow, QWidget, QDialog, QLabel, QHBoxLayout
+
+from gui.drawing_modes import PenMode, LineMode
 from gui.widgets import PixelsContainerWidget, WidgetFromFile, NewFileDialog
 from gui.io_manager import IOManager
-from gui.qgraphics_components import PixelGridScene, PenMode
+from gui.qgraphics_components import PixelGridScene
 import os
 
 
@@ -15,7 +17,7 @@ class MainWindow(QMainWindow, WidgetFromFile):
         super().__init__()
         self.loadUI(self.ui_path)
         self.setWindowTitle(self.title)
-        self.pixelGridScene = PixelGridScene(self.pixelGridView, 4, 16)
+        self.pixelGridScene = PixelGridScene(self.pixelGridView, 32, 16)
         self.pixelGridView.setScene(self.pixelGridScene)
         self.io = IOManager()
         self.initEvents()
@@ -26,6 +28,7 @@ class MainWindow(QMainWindow, WidgetFromFile):
         self.actionNewFile.triggered.connect(self.actionNewFileHandler)
         self.actionOpenFile.triggered.connect(self.actionOpenFileHandler)
         self.penRadioButton.clicked.connect(self.penRadioButtonHandler)
+        self.lineRadioButton.clicked.connect(self.lineRadioButtonHandler)
 
     def actionSaveHandler(self):
         self.io.saveQImage(self, self.pixelGridScene.convertPixelGridToQImage())
@@ -47,3 +50,6 @@ class MainWindow(QMainWindow, WidgetFromFile):
 
     def penRadioButtonHandler(self):
         self.pixelGridScene.changeDrawingMode(PenMode())
+
+    def lineRadioButtonHandler(self):
+        self.pixelGridScene.changeDrawingMode(LineMode())

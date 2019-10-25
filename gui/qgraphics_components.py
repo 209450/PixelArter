@@ -4,11 +4,15 @@ from PyQt5.QtGui import QPainter, QPen, QColor, QBrush, QImage
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsRectItem, QGraphicsView
 from PyQt5 import QtCore
 
+from gui.drawing_modes import DrawingModeStrategy
+
 
 class PixelGridScene(QGraphicsScene):
     zoom = {'value': 1, 'ratio': 0.1}
-    default_pixel_size = 50
+    pixel_size = 50
     background_color = QColor(0, 0, 0, 0)
+    first_color = QColor(0, 0, 255, 255)
+    second_color = QColor(255, 0, 0, 255)
 
     def __init__(self, graphic_view, height, width):
         super().__init__()
@@ -21,11 +25,11 @@ class PixelGridScene(QGraphicsScene):
     @classmethod
     def pixelGridFromQImage(cls, graphic_view, image):
         new_grid = PixelGridScene(graphic_view, image.height(), image.width())
-        new_grid.modifyPixels(lambda x, i, j: x.change_fulfillment(image.pixelColor(j, i)))
+        new_grid.modifyPixels(lambda x, i, j: x.changeFulfillment(image.pixelColor(j, i)))
         return new_grid
 
     def _makePixelGrid(self, height, width):
-        size = self.default_pixel_size
+        size = self.pixel_size
         for i in range(height):
             for j in range(width):
                 pixel = Pixel(QRectF(j * size, i * size, size, size), Pixel.default_color)
@@ -36,21 +40,15 @@ class PixelGridScene(QGraphicsScene):
         self.current_drawing_mode = mode
 
     def mousePressEvent(self, event):
-        x = event.scenePos().x()
-        y = event.scenePos().y()
-        self.current_drawing_mode.mousePress(self, self.pixels, x, y)
+        self.current_drawing_mode.mousePress(self, event)
         self.update()
 
     def mouseReleaseEvent(self, event):
-        x = event.scenePos().x()
-        y = event.scenePos().y()
-        self.current_drawing_mode.mouseRelease(self, self.pixels, x, y)
+        self.current_drawing_mode.mouseRelease(self, event)
         self.update()
 
     def mouseMoveEvent(self, event):
-        x = event.scenePos().x()
-        y = event.scenePos().y()
-        self.current_drawing_mode.mouseMove(self, self.pixels, x, y)
+        self.current_drawing_mode.mouseMove(self, event)
         self.update()
 
     def wheelEvent(self, event):
@@ -72,7 +70,7 @@ class PixelGridScene(QGraphicsScene):
     def convertPixelGridToQImage(self):
         pixels = self.pixels
         image = QImage(pixels.shape[1], pixels.shape[0], QImage.Format_RGB32)
-        self.modifyPixels(lambda x, i, j: image.setPixelColor(j, i, x.get_current_color()))
+        self.modifyPixels(lambda x, i, j: image.setPixelColor(j, i, x.getCurrentColor()))
         return image
 
     def modifyPixels(self, callback):
@@ -93,40 +91,23 @@ class Pixel(QGraphicsRectItem):
 
     def __init__(self, rect, qColor):
         super().__init__(rect)
-        self.change_fulfillment(qColor)
+        self.color = qColor
+        self.brush = QBrush(qColor)
+        self.color_state = self.color
 
-    def change_fulfillment(self, color):
+    def changeFulfillment(self, color):
         self.color = color
         self.brush = QBrush(color)
 
-    def get_current_color(self):
+    def getCurrentColor(self):
         return self.color
+
+    def stateCurrentColor(self):
+        self.color_state = QColor(self.color)
+
+    def applyStatedColor(self):
+        self.changeFulfillment(self.color_state)
 
     def paint(self, painter, QStyleOptionGraphicsItem, widget=None):
         painter.setBrush(self.brush)
         painter.drawRect(self.rect())
-
-
-class DrawingModeStrategy:
-    def mouseMove(self, scene, pixels, x, y):
-        pass
-
-    def mousePress(self, scene, pixels, x, y):
-        pass
-
-    def mouseRelease(self, scene, pixels, x, y):
-        pass
-
-
-class PenMode(DrawingModeStrategy):
-
-    def mouseMove(self, scene, pixels, x, y):
-        self.mousePress(scene, pixels, x, y)
-
-    def mousePress(self, scene, pixels, x, y):
-        pixel = scene.itemAt(x, y, scene.graphic_view.transform())
-        if pixel is not None:
-            pixel.change_fulfillment(QColor(0, 0, 255, 255))
-
-    def mouseRelease(self, scene, pixels, x, y):
-        pass
