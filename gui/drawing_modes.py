@@ -9,11 +9,10 @@ class DrawingModeStrategy:
         pass
 
     def mousePress(self, scene, event):
+        scene.createSceneSnapshot()
         pass
 
     def mouseRelease(self, scene, event):
-        print("ee"
-              "")
         pass
 
     @staticmethod
@@ -39,6 +38,7 @@ class PenMode(DrawingModeStrategy):
         self._drawPixels(scene, event)
 
     def mousePress(self, scene, event):
+        super().mousePress(scene, event)
         self._drawPixels(scene, event)
 
     def _drawPixels(self, scene, event):
@@ -60,6 +60,7 @@ class LineMode(DrawingModeStrategy):
         self.affected_items = set()
 
     def mousePress(self, scene, event):
+        super().mousePress(scene, event)
         start_pos = event.scenePos()
 
         self.line = QLineF(start_pos.x(), start_pos.y(), start_pos.x(), start_pos.y())
@@ -97,5 +98,6 @@ class LineMode(DrawingModeStrategy):
             self.affected_items.remove(i)
 
     def mouseRelease(self, scene, event):
+        super().mouseRelease(scene, event)
         scene.removeItem(self.line_obj)
         pass
