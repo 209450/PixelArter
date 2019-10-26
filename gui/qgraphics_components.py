@@ -6,6 +6,7 @@ from PyQt5 import QtCore
 from copy import deepcopy, copy
 
 from gui.drawing_modes import DrawingModeStrategy
+from gui.undoredomanager import UndoRedoManager, Snapshot
 
 
 class PixelGridScene(QGraphicsScene):
@@ -23,26 +24,16 @@ class PixelGridScene(QGraphicsScene):
         self.pixels = numpy.empty((height, width), dtype=Pixel)
         self._makeEmptyPixelGrid(height, width)
         self.current_drawing_mode = DrawingModeStrategy()
-        self.undo_stack = []
-        self.redo_stack = []
-
-    def createSceneSnapshot(self):
-        self._addSnapShotToMementoStack(self.undo_stack)
-
-    def _addSnapShotToMementoStack(self, stack):
-        if len(stack) > self.memento_max_size:
-            stack.pop(0)
-        stack.append(self._SceneSnapshot(self))
+        self.memento = UndoRedoManager()
 
     def undo(self):
-        if self.undo_stack:
-            self._addSnapShotToMementoStack(self.redo_stack)
-            self.undo_stack.pop().restore()
+        self.memento.undo(self._SceneSnapshot(self))
 
     def redo(self):
-        if self.redo_stack:
-            self._addSnapShotToMementoStack(self.undo_stack)
-            self.redo_stack.pop().restore()
+        self.memento.redo(self._SceneSnapshot(self))
+
+    def createSceneSnapshot(self):
+        self.memento.registerSnapshot(self._SceneSnapshot(self))
 
     @classmethod
     def pixelGridFromQImage(cls, graphic_view, image):
@@ -111,7 +102,7 @@ class PixelGridScene(QGraphicsScene):
             for j in range(pixels.shape[1]):
                 callback(pixels[i, j], i, j)
 
-    class _SceneSnapshot:
+    class _SceneSnapshot(Snapshot):
         def __init__(self, scene):
             self.scene = scene
             self.first_color = QColor(scene.first_color)
