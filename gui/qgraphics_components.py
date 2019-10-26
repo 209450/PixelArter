@@ -3,8 +3,10 @@ from PyQt5.QtCore import QRectF
 from PyQt5.QtGui import QPainter, QPen, QColor, QBrush, QImage
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsRectItem, QGraphicsView
 from PyQt5 import QtCore
+from copy import deepcopy, copy
 
 from gui.drawing_modes import DrawingModeStrategy
+from gui.undoredomanager import UndoRedoManager, Snapshot
 
 
 class PixelGridScene(QGraphicsScene):
@@ -13,22 +15,37 @@ class PixelGridScene(QGraphicsScene):
     background_color = QColor(0, 0, 0, 0)
     first_color = QColor(0, 0, 255, 255)
     second_color = QColor(255, 0, 0, 255)
+    memento_max_size = 5
 
     def __init__(self, graphic_view, height, width):
         super().__init__()
         self.graphic_view = graphic_view
         self.setBackgroundBrush(self.background_color)
         self.pixels = numpy.empty((height, width), dtype=Pixel)
-        self._makePixelGrid(height, width)
+        self._makeEmptyPixelGrid(height, width)
         self.current_drawing_mode = DrawingModeStrategy()
+        self.memento = UndoRedoManager()
+
+    def undo(self):
+        self.memento.undo(self._SceneSnapshot(self))
+
+    def redo(self):
+        self.memento.redo(self._SceneSnapshot(self))
+
+    def createSceneSnapshot(self):
+        self.memento.registerSnapshot(self._SceneSnapshot(self))
 
     @classmethod
     def pixelGridFromQImage(cls, graphic_view, image):
         new_grid = PixelGridScene(graphic_view, image.height(), image.width())
-        new_grid.modifyPixels(lambda x, i, j: x.changeFulfillment(image.pixelColor(j, i)))
+        new_grid.iteratePixelsWithIndex(lambda x, i, j: x.changeFulfillment(image.pixelColor(j, i)))
         return new_grid
 
-    def _makePixelGrid(self, height, width):
+    def updatePixelGridFromPixels(self):
+        self.clear()
+        self.iteratePixels(lambda x: self.addItem(x))
+
+    def _makeEmptyPixelGrid(self, height, width):
         size = self.pixel_size
         for i in range(height):
             for j in range(width):
@@ -70,20 +87,36 @@ class PixelGridScene(QGraphicsScene):
     def convertPixelGridToQImage(self):
         pixels = self.pixels
         image = QImage(pixels.shape[1], pixels.shape[0], QImage.Format_RGB32)
-        self.modifyPixels(lambda x, i, j: image.setPixelColor(j, i, x.getCurrentColor()))
+        self.iteratePixelsWithIndex(lambda x, i, j: image.setPixelColor(j, i, x.getCurrentColor()))
         return image
 
-    def modifyPixels(self, callback):
+    def iteratePixels(self, callback):
         pixels = self.pixels
         for i in range(pixels.shape[0]):
             for j in range(pixels.shape[1]):
                 callback(pixels[i, j])
 
-    def modifyPixels(self, callback):
+    def iteratePixelsWithIndex(self, callback):
         pixels = self.pixels
         for i in range(pixels.shape[0]):
             for j in range(pixels.shape[1]):
                 callback(pixels[i, j], i, j)
+
+    class _SceneSnapshot(Snapshot):
+        def __init__(self, scene):
+            self.scene = scene
+            self.first_color = QColor(scene.first_color)
+            self.second_color = QColor(scene.second_color)
+            self.pixels = deepcopy(scene.pixels)
+
+        def restore(self):
+            self.scene.first_color = self.first_color
+            self.scene.second_color = self.second_color
+
+            self.scene.pixels = deepcopy(self.pixels)
+            self.scene.updatePixelGridFromPixels()
+
+            self.scene.update()
 
 
 class Pixel(QGraphicsRectItem):
@@ -111,3 +144,8 @@ class Pixel(QGraphicsRectItem):
     def paint(self, painter, QStyleOptionGraphicsItem, widget=None):
         painter.setBrush(self.brush)
         painter.drawRect(self.rect())
+
+    def __deepcopy__(self, memo):
+        rect = deepcopy(self.rect(), memo)
+        color = deepcopy(self.color, memo)
+        return Pixel(rect, color)

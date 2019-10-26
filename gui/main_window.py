@@ -29,6 +29,8 @@ class MainWindow(QMainWindow, WidgetFromFile):
         self.actionOpenFile.triggered.connect(self.actionOpenFileHandler)
         self.penRadioButton.clicked.connect(self.penRadioButtonHandler)
         self.lineRadioButton.clicked.connect(self.lineRadioButtonHandler)
+        self.actionUndo.triggered.connect(self.actionUndoHandler)
+        self.actionRedo.triggered.connect(self.actionRedoHandler)
 
     def actionSaveHandler(self):
         self.io.saveQImage(self, self.pixelGridScene.convertPixelGridToQImage())
@@ -53,3 +55,9 @@ class MainWindow(QMainWindow, WidgetFromFile):
 
     def lineRadioButtonHandler(self):
         self.pixelGridScene.changeDrawingMode(LineMode())
+
+    def actionUndoHandler(self):
+        self.pixelGridScene.undo()
+
+    def actionRedoHandler(self):
+        self.pixelGridScene.redo()
