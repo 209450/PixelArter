@@ -1,6 +1,6 @@
 from PyQt5 import QtCore
 from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtWidgets import QMainWindow, QWidget, QDialog, QLabel, QHBoxLayout
+from PyQt5.QtWidgets import QMainWindow, QWidget, QDialog, QLabel, QHBoxLayout, QColorDialog
 
 from gui.drawing_modes import PenMode, LineMode
 from gui.widgets import PixelsContainerWidget, WidgetFromFile, NewFileDialog
